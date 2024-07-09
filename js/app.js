@@ -97,6 +97,6 @@ const addBorder = (event) => {
 /*----------- Event Listeners ----------*/
     cellsElements.forEach((cell) => {
         cell.addEventListener("mouseenter", displayOptions);
-        cell.addEventListener("mouseout", hideOptions);
+        cell.addEventListener("mouseleave", hideOptions);
         console.log("I'm the cell: " + cell);
     });
