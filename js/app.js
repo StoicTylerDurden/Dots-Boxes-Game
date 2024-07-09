@@ -3,13 +3,24 @@
 
 /*---------- Variables (state) ---------*/
 let cell;
+let cellId;
 
+let lineIndex; // ["red", "blue", "red", "blue"]
 // top, right, bottom, left
+
+
+let turn = "red"
+let redScore; 
+let blueScore;
+let win = false;
+let tie = false;
+let lines = ["", "", "", ""]
 let squares = [
     ["", "", "", ""], ["", "", "", ""], ["", "", "", ""],
     ["", "", "", ""], ["", "", "", ""], ["", "", "", ""],
     ["", "", "", ""], ["", "", "", ""], ["", "", "", ""]
 ]
+console.log(squares)
 /*----- Cached Element References  -----*/
 const cellsElements = document.querySelectorAll(".cell")
 // const topButton = document.querySelector("#top-button");
@@ -18,9 +29,12 @@ const cellsElements = document.querySelectorAll(".cell")
 // const leftButton = document.querySelector("#left-button");
 // const buttons = document.querySelector('.buttons')
 /*-------------- Functions -------------*/
-const displayOptions = (event)=>{
+
+// displaOptions will be called when hovered over a cell
+function displayOptions (event){
 
     cell = event.target;
+    cellId = event.target.id;
     console.log("I'm current cell inside displayOptions " + cell.id);
 
 
@@ -65,34 +79,90 @@ const displayOptions = (event)=>{
     rightButton.addEventListener("click", addBorder);
     bottomButton.addEventListener("click", addBorder);
     leftButton.addEventListener("click", addBorder);
+    updateBoard()
 
+    function updateBoard(){
+        squares.forEach((square)=>{
+
+        })        
+    }
 
 }
-
-// Modify the hideOptions function later
+// Hide options when mouseout of the cell
 const hideOptions = (event) => {
     const cell = event.target;
     const buttons = cell.querySelectorAll(".button");
     buttons.forEach(button => button.remove());
 };
 
+
+// Add border to chosen cell when a button is clicked
 const addBorder = (event) => {
-    // event.target.id will return the id of the clicked button. ex: top-button
-    console.log("CurrentCell " + cell)
-    console.log("currentCell id: " + cell.id)
+// event.target.id will return the id of the clicked button. ex: top-button
+
+// cell is the square that is being styled.
+console.log("CurrentCell " + cell)
+console.log("CurrentCell id: " + cellId)
 
     if (event.target.id === 'top-button') {
-        cell.style.borderTop = "3px solid black";
-    } else if (event.target.id === 'right-button') {
-        cell.style.borderRight = "3px solid black";
+
+        // Check if the top border empty  
+        if(cell.style.borderTop === ""){
+            cell.style.borderTop = `3px solid ${turn}`;
+            
+            switchTurns()
+            }
+        else{
+            console.log("There's already a line my guy");
+        }
+
+    } else if(event.target.id === 'right-button') {
+
+        // Check if the right border empty  
+        if(cell.style.borderRight === ""){
+            cell.style.borderRight = `3px solid ${turn}`;
+            
+            switchTurns()
+        }
+        else{
+            console.log("There's already a line my guy");
+        }
+
     } else if (event.target.id === 'bottom-button') {
-        cell.style.borderBottom = "3px solid black";
+
+        // Check if the bottom border empty  
+        if(cell.style.borderBottom === ""){
+            cell.style.borderBottom = `3px solid ${turn}`;
+            switchTurns()
+        }
+        else{
+            console.log("There's already a line my guy");
+        }
     } else if (event.target.id === 'left-button') {
-        cell.style.borderLeft = "3px solid black";
+
+        // Check if the left border empty  
+        if(cell.style.borderLeft === ""){
+            cell.style.borderLeft = `3px solid ${turn}`;
+            switchTurns()
+        }
+        else{
+            console.log("There's already a line my guy");
+        }
     }
 
+    // isComplete()
+    // switchTurns()
+    // render() which has two functions (updateBoard), updateMessage "Making the front-end same as backend (JS)"
 };
 
+const switchTurns = ()=>{
+    if(turn==="red"){
+        turn = "blue"
+    }
+    else if(turn === "blue"){
+        turn = "red"
+    }
+}
 
 /*----------- Event Listeners ----------*/
     cellsElements.forEach((cell) => {
