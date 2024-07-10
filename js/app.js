@@ -2,25 +2,26 @@
 
 
 /*---------- Variables (state) ---------*/
-let cell;
-let cellId;
-
+let square;
+let squareIndex;
+let squareIsFull = false;
 let lineIndex; // ["red", "blue", "red", "blue"]
 // top, right, bottom, left
 
 
 let turn = "red"
-let redScore; 
-let blueScore;
+let redScore = 0;
+let blueScore = 0;
 let win = false;
 let tie = false;
-let lines = ["", "", "", ""]
 let squares = [
     ["", "", "", ""], ["", "", "", ""], ["", "", "", ""],
     ["", "", "", ""], ["", "", "", ""], ["", "", "", ""],
     ["", "", "", ""], ["", "", "", ""], ["", "", "", ""]
 ]
 console.log(squares)
+
+
 /*----- Cached Element References  -----*/
 const cellsElements = document.querySelectorAll(".cell")
 // const topButton = document.querySelector("#top-button");
@@ -28,15 +29,122 @@ const cellsElements = document.querySelectorAll(".cell")
 // const bottomButton = document.querySelector("#bottom-button");
 // const leftButton = document.querySelector("#left-button");
 // const buttons = document.querySelector('.buttons')
+
+
 /*-------------- Functions -------------*/
+function placeLine(squareIndex, lineIndex){
+    console.log("squareIndex: " + squareIndex + " lineIndex = " + lineIndex)
+
+    for (let i=0; i<=8; i++){
+        // If right border is selected for a square add a right border for it and add a left border for its adjacent left square
+        if(lineIndex === 1){
+            squares[squareIndex][lineIndex] = turn
+
+            // If it has a square on its left add a right border for it
+            if((squareIndex+1)%3 !== 0)
+            squares[squareIndex+1][lineIndex+2] = turn  
+        }
+
+        // If left border is selected for a square add a left border for it and add a right border for its adjacent left square 
+        if(lineIndex === 3){
+            squares[squareIndex][lineIndex] = turn
+
+            // If it has a square on its left add a right border for it
+            if(squareIndex%3 !== 0)
+            squares[squareIndex-1][lineIndex-2] = turn  
+        }
+
+        // If top square and bottom square have same border assign the border for both
+        else if(lineIndex === 0){
+            squares[squareIndex][lineIndex] = turn
+
+            if(squareIndex>=3){
+            squares[squareIndex-3][lineIndex+2] = turn
+            }
+        }
+        // If top square and bottom square have same border assign the border for both
+        else if(lineIndex === 2){
+            squares[squareIndex][lineIndex] = turn
+
+            if(squareIndex<=5){
+            squares[squareIndex+3][lineIndex-2] = turn
+            }
+        }
+
+    }// end for loop
+
+
+    squares.forEach((square, id)=>{
+        console.log(`printing square= " ${id} [${square}] `);
+    })
+    console.log("I'm inside placeLine function: squares[squareIndex]" + squares[squareIndex])
+    console.log("I'm inside placeLine function: squares[squareIndex][lineIndex]"  + squares[squareIndex][lineIndex])
+}
+
+function checkIfSquareIsFull() {
+    squares.forEach(square => {
+        // Check if every line in the square is not empty
+        if (square.every(line => line !== "")) {
+            squareIsFull = true;
+        } else {
+            squareIsFull = false;
+        }
+    });
+}
+
+function updateBoard(){
+    // It will loop through the squares array, it will update the state for each cellElement in the front-end
+    squares.forEach((square, sqrID)=>{
+        console.log("This is a square " + square)
+        console.log("This is a sqrID: " + sqrID);
+        console.log("This is a sqrID: " + square[sqrID]);
+        console.log(cellsElements)
+        square.forEach((line, lineIndex)=>{
+            if (lineIndex === 0 && line!==""){
+            console.log("line : " + line)
+            cellsElements[sqrID].style.borderTop = `3px solid ${line}`
+
+            } else if (lineIndex === 1 && line!==""){
+            cellsElements[sqrID].style.borderRight = `3px solid ${line}`
+
+            } else if (lineIndex === 2 && line!==""){
+                cellsElements[sqrID].style.borderBottom = `3px solid ${line}`
+                
+            } else if (lineIndex === 3 && line!==""){
+                cellsElements[sqrID].style.borderLeft = `3px solid ${line}`
+            }
+        })
+    })   
+}
+// Color the square if it has all borders
+function colorSquare(squareIndex){
+        // Check if every line in the square is not empty
+        if (squares[squareIndex].every(line => line !== "")) {
+            if(turn === "red"){
+            cellsElements[squareIndex].style.background = `darkred`
+            redScore +=1
+            squareIsFull = true;
+            switchTurns()
+
+            } else if(turn === "blue"){
+            cellsElements[squareIndex].style.background = `darkblue`
+            blueScore +=1
+            squareIsFull = true;
+            switchTurns()
+            }
+        }
+    }
+
+function scoring(){
+
+}
+
 
 // displaOptions will be called when hovered over a cell
 function displayOptions (event){
 
-    cell = event.target;
-    cellId = event.target.id;
-    console.log("I'm current cell inside displayOptions " + cell.id);
-
+    square = event.target;
+    squareIndex = parseInt(event.target.id);
 
     const topButton = document.createElement('button')
     const rightButton = document.createElement('button')
@@ -60,11 +168,11 @@ function displayOptions (event){
     bottomButton.innerText = "bottom"
     leftButton.innerText = "left"
 
-    // Appending all the buttons to the clicked cell(event.target) as their parent
-    cell.appendChild(topButton)
-    cell.appendChild(rightButton)
-    cell.appendChild(bottomButton)
-    cell.appendChild(leftButton)
+    // Appending all the buttons to the clicked square(event.target) as their parent
+    square.appendChild(topButton)
+    square.appendChild(rightButton)
+    square.appendChild(bottomButton)
+    square.appendChild(leftButton)
 
     // Initially the buttons are hidden so the following will make them visible
     topButton.style.display = 'block';
@@ -79,79 +187,54 @@ function displayOptions (event){
     rightButton.addEventListener("click", addBorder);
     bottomButton.addEventListener("click", addBorder);
     leftButton.addEventListener("click", addBorder);
-    updateBoard()
 
-    function updateBoard(){
-        squares.forEach((square)=>{
 
-        })        
-    }
 
 }
-// Hide options when mouseout of the cell
+// Hide options when mouseout of the square
 const hideOptions = (event) => {
-    const cell = event.target;
-    const buttons = cell.querySelectorAll(".button");
+    const square = event.target;
+    const buttons = square.querySelectorAll(".button");
     buttons.forEach(button => button.remove());
 };
 
 
-// Add border to chosen cell when a button is clicked
+// Add border to chosen square when a button is clicked
 const addBorder = (event) => {
-// event.target.id will return the id of the clicked button. ex: top-button
+    // event.target.id will return the id of the clicked button. ex: top-button
+    // square that is being styled.
+    console.log("Current square " + square)
+    console.log("Current square index: " + squareIndex)
 
-// cell is the square that is being styled.
-console.log("CurrentCell " + cell)
-console.log("CurrentCell id: " + cellId)
+    if(event.target.id === 'top-button')
+        lineIndex = 0;
 
-    if (event.target.id === 'top-button') {
+    else if(event.target.id === 'right-button')
+        lineIndex = 1;
 
-        // Check if the top border empty  
-        if(cell.style.borderTop === ""){
-            cell.style.borderTop = `3px solid ${turn}`;
-            
-            switchTurns()
-            }
-        else{
-            console.log("There's already a line my guy");
-        }
+    else if(event.target.id === 'bottom-button')
+        lineIndex = 2;
 
-    } else if(event.target.id === 'right-button') {
+    else if(event.target.id === 'left-button')
+        lineIndex = 3;
 
-        // Check if the right border empty  
-        if(cell.style.borderRight === ""){
-            cell.style.borderRight = `3px solid ${turn}`;
-            
-            switchTurns()
-        }
-        else{
-            console.log("There's already a line my guy");
-        }
 
-    } else if (event.target.id === 'bottom-button') {
-
-        // Check if the bottom border empty  
-        if(cell.style.borderBottom === ""){
-            cell.style.borderBottom = `3px solid ${turn}`;
-            switchTurns()
-        }
-        else{
-            console.log("There's already a line my guy");
-        }
-    } else if (event.target.id === 'left-button') {
-
-        // Check if the left border empty  
-        if(cell.style.borderLeft === ""){
-            cell.style.borderLeft = `3px solid ${turn}`;
-            switchTurns()
-        }
-        else{
-            console.log("There's already a line my guy");
-        }
+    // Check if there's an existing line
+    if(squares[squareIndex][lineIndex] !==""){
+        console.log("There's an existing line my guy");
+        return
     }
 
+    placeLine(squareIndex, lineIndex)
+    checkIfSquareIsFull()
+    updateBoard()
+    colorSquare(squareIndex) //Make the front-end get colored 
+    console.log("Red Score: " + redScore)
+    console.log("Blue Score: " + blueScore);
+    scoring()
+    // isGameComplete()
     // isComplete()
-    // switchTurns()
+    switchTurns()
     // render() which has two functions (updateBoard), updateMessage "Making the front-end same as backend (JS)"
 };
 
@@ -165,8 +248,8 @@ const switchTurns = ()=>{
 }
 
 /*----------- Event Listeners ----------*/
-    cellsElements.forEach((cell) => {
-        cell.addEventListener("mouseenter", displayOptions);
-        cell.addEventListener("mouseleave", hideOptions);
-        console.log("I'm the cell: " + cell);
+    cellsElements.forEach((square) => {
+        square.addEventListener("mouseenter", displayOptions);
+        square.addEventListener("mouseleave", hideOptions);
+        console.log("I'm the square: " + square);
     });
