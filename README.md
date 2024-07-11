@@ -20,7 +20,7 @@ To get started with the Dots & Boxes game:
 3. Enjoy playing the game by clicking on the grid to add lines and complete boxes.
 
 ### Or simply enjoy the game  
-View the project as it's deployed by clicking [here](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Command_line)
+View the project as it's deployed by clicking [here](https://stoictylerdurden.github.io/Dots-Boxes-Game/)
 
 
 ## Screenshots
