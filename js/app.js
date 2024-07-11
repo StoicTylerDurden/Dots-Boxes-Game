@@ -4,17 +4,15 @@
 /*---------- Variables (state) ---------*/
 let square;
 let squareIndex;
-let squareIsFull = false;
+let isGameOver = false;
 let lineIndex; // (0, 1, 2, 3) (top, right, bottom, left)
-// top, right, bottom, left
 let isdoubleSquared1 = false;
 let isdoubleSquared2 = false;
 let scored = false;
 let turn = "red"
-let player1Score = 0;
 let redScore = 0;
 let blueScore = 0;
-let win = false;
+let winner;
 let tie = false;
 let squares = [
     ["", "", "", ""], ["", "", "", ""], ["", "", "", ""],
@@ -25,16 +23,11 @@ let squares = [
 
 /*----- Cached Element References  -----*/
 const cellsElements = document.querySelectorAll(".cell")
-// const topButton = document.querySelector("#top-button");
-// const rightButton = document.querySelector("#right-button");
-// const bottomButton = document.querySelector("#bottom-button");
-// const leftButton = document.querySelector("#left-button");
-// const buttons = document.querySelector('.buttons')
-
-
+const messageEl = document.querySelector("#message")
+const resetBtnEl = document.querySelector("#reset")
 /*-------------- Functions -------------*/
+
 function placeLine(squareIndex, lineIndex, turn){
-    console.log("squareIndex: " + squareIndex + " lineIndex = " + lineIndex)
 
         // If right border is selected for a square add a right border for it and add a left border for its adjacent right square
         if(lineIndex === 1){
@@ -46,19 +39,14 @@ function placeLine(squareIndex, lineIndex, turn){
                 squares[squareIndex+1][lineIndex+2] = turn 
 
                 if (squares[squareIndex+1].every(line => line !== "")) {
-                    // increase ${turn} score by 1 when there're 4 borders in a square
-                    // updateScore(turn)
-                    // console.log(`(lineIndex === 1 turn: ${turn} redScore = ${redScore}`)
-                    // console.log(`(lineIndex === 1 turn: ${turn} blueScore = ${blueScore}`)
 
                     squares[squareIndex+1].forEach((line, lineId )=>{
                         squares[squareIndex+1][lineId] = turn
                         
                     })
+                    // Play one more time if you score a square
                     switchTurns()
                     isdoubleSquared1 = true
-                    console.log("(lineIndex === 1) turn: " + turn)
-
                 }
                  
             }
@@ -72,20 +60,14 @@ function placeLine(squareIndex, lineIndex, turn){
             if(squareIndex%3 !== 0){
             squares[squareIndex-1][lineIndex-2] = turn
             
-                if (squares[squareIndex-1].every(line => line !== "")) {
-                    // increase ${turn} score by 1 when there're 4 borders in a square
-                    // updateScore(turn)
-                    // console.log(`(lineIndex === 3 turn: ${turn} redScore = ${redScore}`)
-                    // console.log(`(lineIndex === 3 turn: ${turn} blueScore = ${blueScore}`)
-                    
+                if (squares[squareIndex-1].every(line => line !== "")) {                    
                     squares[squareIndex-1].forEach((line, lineId )=>{
                         squares[squareIndex-1][lineId] = turn
                         
                     })
+                    // Play one more time if you score a square
                     switchTurns()
                     isdoubleSquared1 = true
-                    console.log("(lineIndex === 3) turn: " + turn)
-
                 }
 
             }
@@ -95,24 +77,18 @@ function placeLine(squareIndex, lineIndex, turn){
         else if(lineIndex === 0){
             squares[squareIndex][lineIndex] = turn
 
-            
             if(squareIndex>=3){
             squares[squareIndex-3][lineIndex+2] = turn
 
                 if (squares[squareIndex-3].every(line => line !== "")) {
 
-                    // increase ${turn} score by 1 when there're 4 borders in a square
-                    // updateScore(turn)
-                    // console.log(`(lineIndex === 0 turn: ${turn} redScore = ${redScore}`)
-                    // console.log(`(lineIndex === 0 turn: ${turn} blueScore = ${blueScore}`)
                     squares[squareIndex-3].forEach((line, lineId )=>{
                         squares[squareIndex-3][lineId] = turn
                         
                     })
+                    // Play one more time if you score a square
                     switchTurns()
                     isdoubleSquared1 = true
-                    console.log("(lineIndex === 0) turn: " + turn)
-
                 }
             }
         }
@@ -125,58 +101,72 @@ function placeLine(squareIndex, lineIndex, turn){
 
                 if (squares[squareIndex+3].every(line => line !== "")) {
 
-                    // increase ${turn} score by 1 when there're 4 borders in a square
-                    // updateScore(turn)
-                    // console.log(`(lineIndex === 2 turn: ${turn} redScore = ${redScore}`)
-                    // console.log(`(lineIndex === 2 turn: ${turn} blueScore = ${blueScore}`)
                     squares[squareIndex+3].forEach((line, lineId )=>{
                         squares[squareIndex+3][lineId] = turn
                         
                     })
+                    // Play one more time if you score a square
                     switchTurns()
                     isdoubleSquared1 = true
-                    console.log("(lineIndex === 2) turn: " + turn)
-
                 }
             }
         }
             // If all lines exist in the button clicked assign the ${turn} color to all borders 
             if (squares[squareIndex].every(line => line !== "")) {
-                // increase ${turn} score by 1 when there're 4 borders in a square
-    
-                // updateScore(turn)
-                // console.log(`(lineIndex === Outside turn: ${turn} redScore = ${redScore}`)
-                // console.log(`(lineIndex === Outside turn: ${turn} blueScore = ${blueScore}`)
+
                 squares[squareIndex].forEach((line, lineId )=>{
                     squares[squareIndex][lineId] = turn
-                    
                 })
+                // Play one more time if you score a square
                 switchTurns()
                 isdoubleSquared2 = true
-                // If there's a line that will score 2 squares make it so that the player plays again
+                // // Play one more time if you score 2 squares at the same time
                 if (isdoubleSquared1 && isdoubleSquared2){
-                    console.log("(lineIndex === Weird condition turn: " + turn)
                     switchTurns()
                 }
-                console.log("(lineIndex === Outside) turn: " + turn)
     
             }
-
-    squares.forEach((square, id)=>{
-        console.log(`printing square= " ${id} [${square}] `);
-    }
-)}
-
-function checkIfSquareIsFull() {
-    squares.forEach(square => {
-        // Check if every line in the square is not empty
-        if (square.every(line => line !== "")) {
-            squareIsFull = true;
-        } else {
-            squareIsFull = false;
         }
+function render(){
+    updateBoard()
+    updateMessage()
+}
+
+
+function init(){
+
+    square;
+    squareIndex;
+    isGameOver = false;
+    lineIndex; // (0, 1, 2, 3) (top, right, bottom, left)
+    isdoubleSquared1 = false;
+    isdoubleSquared2 = false;
+    scored = false;
+    turn = "red"
+    redScore = 0;
+    blueScore = 0;
+    winner;
+    tie = false;
+    squares = [
+        ["", "", "", ""], ["", "", "", ""], ["", "", "", ""],
+        ["", "", "", ""], ["", "", "", ""], ["", "", "", ""],
+        ["", "", "", ""], ["", "", "", ""], ["", "", "", ""]
+    ]
+
+    clearFrontEnd() // To clear all the styling and everything in front-end
+    render()
+}
+
+function clearFrontEnd(){
+    cellsElements.forEach(cell => {
+        cell.style.borderTop = "";
+        cell.style.borderRight = "";
+        cell.style.borderBottom = "";
+        cell.style.borderLeft = "";
+        cell.style.background = "";
     });
 }
+        
 
 function updateBoard(){
     // It will loop through the squares array, it will update the state for each cellElement in the front-end
@@ -185,7 +175,6 @@ function updateBoard(){
 
         square.forEach((line, lineIndex)=>{
             if (lineIndex === 0 && line!==""){
-            console.log("line : " + line)
             cellsElements[sqrID].style.borderTop = `3px solid ${line}`
 
             } else if (lineIndex === 1 && line!==""){
@@ -200,35 +189,74 @@ function updateBoard(){
         })
     })   
 }
-// Color the square if it has all borders
+
+// Add a background color to the completed square
 function colorSquare(){
-        // Check if every line in the 
-        squares.forEach((square, squareIndex)=>{
-            if (square.every(line => line === "red")) {
-                cellsElements[squareIndex].style.background = `darkred`
-                squareIsFull = true;
+    squares.forEach((square, squareIndex)=>{
+        if (square.every(line => line === "red")) {
+            cellsElements[squareIndex].style.background = `darkred`
+            squareIsFull = true;
 
-            } else if (square.every(line => line === "blue")){
-                cellsElements[squareIndex].style.background = `darkblue`
-                squareIsFull = true;
-        }
-        
+        } else if (square.every(line => line === "blue")){
+            cellsElements[squareIndex].style.background = `darkblue`
+            squareIsFull = true;
+    }
+    
     })// end forloop
+    updateScore(); // Update the score when a square is colored
+    gameOver()
+}
 
+function updateScore(){
+    redScore = 0;
+    blueScore = 0;
+
+    squares.forEach(square => {
+        if (square.every(line => line === "red")) {
+            redScore++;
+        } else if (square.every(line => line === "blue")) {
+            blueScore++;
+        }
+    });
+}
+
+function updateMessage(){
+    let message = ""
+    if(isGameOver === false){
+        message =`Red Score: ${redScore} Blue Score: ${blueScore}
+                             
+        It's ${turn} turn`;
+    }
+    else if(isGameOver === true){
+        message = `The Winner is ${winner}!
+        
+        Click Reset to play another game :)`;
     }
 
-function updateScore(turn){
-    if(turn==="red"){
-        redScore +=1;
+    messageEl.innerText = message
+}
+function gameOver(){
+    // Check if all squares are filled returns boolean
+    isGameOver = squares.every(square => square.every(line => line !== ""));
 
-    }else if(turn==="blue"){
-        blueScore +=1;
+    if (isGameOver) {  
+        // When Game Over checkWinner
+        checkWinner()
     }
-    console.log("Red: " + redScore + " Blue: " + blueScore)
+     
+}
+
+function checkWinner(){
+    if(isGameOver && (redScore>blueScore)){
+        winner = "red"
+    }
+    else if(isGameOver && (redScore<blueScore)){
+        winner = "blue"
+    }
 }
 
 
-// displaOptions will be called when hovered over a cell
+// displaOptions will be called when hovered over a cell and it will display option buttons
 function displayOptions (event){
 
     square = event.target;
@@ -251,6 +279,7 @@ function displayOptions (event){
     bottomButton.id = "bottom-button"
     leftButton.id = "left-button"
 
+    // Adding text to buttons
     topButton.innerText = "↑"
     rightButton.innerText = "→"
     bottomButton.innerText = "↓"
@@ -269,16 +298,13 @@ function displayOptions (event){
     leftButton.style.display = 'block';
 
 
-
     // Event listeners to each button so that it adds the specified border
     topButton.addEventListener("click", addBorder);
     rightButton.addEventListener("click", addBorder);
     bottomButton.addEventListener("click", addBorder);
     leftButton.addEventListener("click", addBorder);
-
-
-
 }
+
 // Hide options when mouseout of the square
 const hideOptions = (event) => {
     const square = event.target;
@@ -286,12 +312,9 @@ const hideOptions = (event) => {
     buttons.forEach(button => button.remove());
 };
 
-
 // Add border to chosen square when a button is clicked
 const addBorder = (event) => {
     // event.target.id will return the id of the clicked button. ex: top-button
-    // square that is being styled.
-    console.log("Current square index: " + squareIndex)
 
     if(event.target.id === 'top-button')
         lineIndex = 0;
@@ -308,20 +331,23 @@ const addBorder = (event) => {
 
     // Check if there's an existing line
     if(squares[squareIndex][lineIndex] !==""){
-        console.log("There's an existing line my guy");
+        messageEl.innerText = `Red Score: ${redScore} Blue Score: ${blueScore}
+                             
+        There's already a line my guy`;
+        return
+    }
+
+    if (winner === true) {
         return
     }
 
     placeLine(squareIndex, lineIndex, turn)
-    checkIfSquareIsFull()
     updateBoard()
     colorSquare() //Make the front-end get colored when there're all borders
-    // console.log("Red Score: " + redScore)
-    // console.log("Blue Score: " + blueScore);
-    // isGameComplete()
-    // isComplete()
     switchTurns()
-    // render() which has two functions (updateBoard), updateMessage "Making the front-end same as backend (JS)"
+
+    render()
+
 };
 
 const switchTurns = ()=>{
@@ -335,7 +361,11 @@ const switchTurns = ()=>{
 }
 
 /*----------- Event Listeners ----------*/
-    cellsElements.forEach((square) => {
-        square.addEventListener("mouseenter", displayOptions);
-        square.addEventListener("mouseleave", hideOptions);
-    });
+cellsElements.forEach((square) => {
+    square.addEventListener("mouseenter", displayOptions);
+    square.addEventListener("mouseleave", hideOptions);
+});
+
+resetBtnEl.addEventListener("click", init);
+
+init()
