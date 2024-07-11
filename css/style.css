@@ -29,8 +29,6 @@ section{
     justify-content: center;
     text-align: center;
     border-collapse: collapse;
-    /* border: 2PX solid aqua; */
-    /* background-color: aqua; */
 }
 
 .cell {
